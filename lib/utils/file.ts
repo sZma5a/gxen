@@ -47,12 +47,23 @@ export class Filer implements IFiler {
 
   static render<T>(templatePath: string, outputPath: string, properties: T, recursiveDirectory?: boolean, existError?: boolean) {
     const code = renderFile(templatePath, properties);
-    Filer.write(outputPath, code, recursiveDirectory, existError);
+    Filer.write(outputPath, Filer.fixCode(code), recursiveDirectory, existError);
   }
 
   static exist(path: string): boolean {
     return fs.existsSync(path);
   }
 
-  static getFileList(path: string) {}
+  static fixCode(code: string) {
+    const codeArray = code.split('\n');
+    const fixedCode = codeArray.filter((c, i) => {
+      if (c.trim() === '') {
+        if (i > 0 && codeArray[i-1].trim() === '' || codeArray[i-1].trim().slice(-1) === ',') {
+          return false;
+        }
+      }
+      return true;
+    }).join('\n');
+    return fixedCode;
+  }
 }
