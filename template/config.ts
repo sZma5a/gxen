@@ -1,7 +1,6 @@
 export const defaultConfig = {
-  workingRootDir: 'gxen/',
   config: {
-    generatedCodeRootDir: 'app/',
+    workingRootDir: 'gxen/',
   },
   type: {
     rootDir: 'seed/',
@@ -10,18 +9,20 @@ export const defaultConfig = {
   },
   code: {
     rootDir: 'template/',
+    generatedTestCodeRootDir: '__test__/',
+    generatedCodeRootDir: 'app/',
   },
   extension: {
-    settingExtention: '.yaml',
-    generatedCodeExtention: '.ts',
-    templateExtention: '.tmpl',
+    settingExtension: '.yaml',
+    generatedCodeExtension: '.ts',
+    templateExtension: '.tmpl',
+    testExtension: '.test',
   }
 } as IConfigFile
 
 export interface IConfigFile {
-  workingRootDir: string;
   config: {
-    generatedCodeRootDir: string;
+    workingRootDir: string;
   };
   type: {
     rootDir: string;
@@ -30,11 +31,13 @@ export interface IConfigFile {
   };
   code: {
     rootDir: string;
-    settingExtention: string;
+    generatedTestCodeRootDir: string;
+    generatedCodeRootDir: string;
   };
   extension: {
-    templateExtention: string;
-    settingExtention: string;
-    generatedCodeExtention: string;
+    templateExtension: string;
+    settingExtension: string;
+    generatedCodeExtension: string;
+    testExtension: string;
   }
 }

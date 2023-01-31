@@ -12,12 +12,14 @@ export interface IConfig {
   getDirPath(path: string): string;
   getConfigPath(): string;
   getGeneratedCodePath(path: string): string;
+  getGeneratedTestCodePath(path: string): string;
 }
 
 export class Config implements IConfig {
   private static readonly settingFile = 'gxen.config.yaml';
   private readonly workingRootDir: string;
   private readonly generatedCodeRootDir: string;
+  private readonly generatedTestCodeRootDir: string;
   private readonly config: IConfigFile;
 
   public readonly coderConfig: ICoderConfig;
@@ -25,17 +27,20 @@ export class Config implements IConfig {
 
   constructor() {
     this.config = Filer.readYaml<IConfigFile>(Config.settingFile);
-    this.workingRootDir = this.config.workingRootDir;
-    this.generatedCodeRootDir = this.config.config.generatedCodeRootDir;
+    this.workingRootDir = this.config.config.workingRootDir;
+    this.generatedCodeRootDir = this.config.code.generatedCodeRootDir;
+    this.generatedTestCodeRootDir = this.config.code.generatedTestCodeRootDir;
     this.coderConfig = {
       ...this.config.code,
-      settingExtension: this.config.extension.settingExtention,
-      generatedCodeExtension: this.config.extension.generatedCodeExtention,
+      settingExtension: this.config.extension.settingExtension,
+      generatedCodeExtension: this.config.extension.generatedCodeExtension,
+      testExtension: this.config.extension.testExtension,
     };
     this.typerConfig = {
       ...this.config.type,
-      templateExtension: this.config.extension.templateExtention,
-      settingExtention: this.config.extension.settingExtention,
+      templateExtension: this.config.extension.templateExtension,
+      settingExtension: this.config.extension.settingExtension,
+      testExtension: this.config.extension.testExtension,
     };
   }
 
@@ -63,5 +68,9 @@ export class Config implements IConfig {
 
   public getGeneratedCodePath(path: string): string {
     return this.generatedCodeRootDir + path;
+  }
+
+  public getGeneratedTestCodePath(path: string): string {
+    return this.generatedTestCodeRootDir + path;
   }
 }

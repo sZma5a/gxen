@@ -1,8 +1,11 @@
 {
   "name": "gxen",
-  "version": "1.0.0",
-  "description": "",
-  "main": "bin/cli.ts",
+  "version": "0.0.3",
+  "description": "Code generator for Node.js",
+  "main": "dist/bin/cli.js",
+  "bin": {
+    "gxen": "dist/bin/cli.js"
+  },
   "scripts": {
     "compile": "tsc"
   },
@@ -11,13 +14,14 @@
   "dependencies": {
     "@types/swig": "^0.0.30",
     "commander": "^9.4.1",
-    "swig": "^1.4.2"
+    "eslint": "^8.33.0",
+    "swig": "^1.4.2",
+    "yaml": "^2.2.1"
   },
   "devDependencies": {
     "@types/node": "^18.11.18",
     "@types/yaml": "^1.9.7",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.4",
-    "yaml": "^2.2.1"
+    "typescript": "^4.9.4"
   }
 }

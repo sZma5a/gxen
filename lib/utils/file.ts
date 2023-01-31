@@ -30,8 +30,6 @@ export class Filer implements IFiler {
     if (Filer.exist(path)) {
       if (existError) {
         throw new Error(`path: ${path} already exists`);
-      } else {
-        return;
       }
     }
     if (recursiveDirectory) {

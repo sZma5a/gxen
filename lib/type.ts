@@ -9,20 +9,23 @@ export interface ITyper {
   readConfig(name: string): string
   getDefaultTemplateFilePath(name: string): string
   getDefaultSettingFilePath(name: string): string
+  getTestTemplateFilePath(name: string): string
 }
 
 export interface ITyperConfig {
   defaultTemplateFileRootDir: string;
   defaultSettingFileRootDir: string;
   templateExtension: string;
-  settingExtention: string;
+  settingExtension: string;
+  testExtension: string;
 }
 
 export class Typer implements ITyper {
   private readonly defaultTemplateFileRootDir: string;
   private readonly defaultSettingFileRootDir: string;
   private readonly templateExtension: string;
-  private readonly settingExtention: string;
+  private readonly settingExtension: string;
+  private readonly testExtension: string;
 
   private readonly config: IConfig;
 
@@ -31,16 +34,22 @@ export class Typer implements ITyper {
     this.defaultTemplateFileRootDir = config.typerConfig.defaultTemplateFileRootDir;
     this.defaultSettingFileRootDir = config.typerConfig.defaultSettingFileRootDir;
     this.templateExtension = config.typerConfig.templateExtension;
-    this.settingExtention = config.typerConfig.settingExtention;
+    this.settingExtension = config.typerConfig.settingExtension;
+    this.testExtension = config.typerConfig.testExtension;
   }
 
   public create(name: string): void {
     const yamlPath = this.getDefaultSettingFilePath(name);
-    const templateFilePath = this.getDefaultTemplateFilePath(name);
     const yaml = defaultSettingFile(name);
     const tmpl = defaultTemplateFile;
     Filer.writeYaml(yamlPath, yaml, true, true);
-    Filer.write(templateFilePath, tmpl, true, true);
+    for (const c of yaml.generate_files) {
+      let path = this.getDefaultTemplateFilePath(c.type);
+      if (c.test) {
+        path = this.getTestTemplateFilePath(c.type);
+      }
+      Filer.write(path, tmpl, true, true);
+    }
   }
 
   public readConfig(name: string): string { 
@@ -53,7 +62,12 @@ export class Typer implements ITyper {
   }
 
   public getDefaultSettingFilePath(name: string): string {
-    const path = this.defaultSettingFileRootDir + name.split('.').join('/') + this.settingExtention;
+    const path = this.defaultSettingFileRootDir + name.split('.').join('/') + this.settingExtension;
+    return this.config.getDirPath(path);
+  }
+
+  public getTestTemplateFilePath(name: string): string {
+    const path = this.defaultTemplateFileRootDir + name.split('.').join('/') + this.testExtension + this.templateExtension;
     return this.config.getDirPath(path);
   }
 }
