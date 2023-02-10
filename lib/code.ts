@@ -4,6 +4,7 @@ import { Config, IConfig } from "./config";
 import { ITyper, Typer } from "./type";
 import { Dummy } from "./utils/dummy";
 import { Filer } from "./utils/file";
+import { Title } from "./utils/title";
 
 export interface ICoder {
   create(type: string, namespace: string): void;
@@ -41,10 +42,12 @@ export class Coder implements ICoder {
 
   public create(type: string, namespace: string): void {
     const pascalName = Coder.getPascalNameFromNamespace(namespace);
+    const dummy = Dummy;
+    const titleUtils = Title;
     Filer.render(
       this.typer.getDefaultSettingFilePath(type),
       this.getCreateCodePath(namespace),
-      {pascalName, namespace},
+      {pascalName, namespace, dummy, titleUtils},
       true,
       true,
     );
@@ -56,9 +59,10 @@ export class Coder implements ICoder {
     const pascalName = config.name.charAt(0).toUpperCase() + config.name.slice(1);
     properties.pascalName = pascalName;
     properties.namespacePath = Coder.getPathFromNamespace(namespace);
+    properties.dummy = Dummy;
+    properties.titleUtils = Title;
     for (const c of config.generate_files) {
       let path = '';
-      properties.dummy = Dummy;
       let templatePath = '';
       if (c.test) {
         templatePath = this.typer.getTestTemplateFilePath(c.type);

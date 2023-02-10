@@ -1,6 +1,6 @@
 {
   "name": "gxen",
-  "version": "0.0.3",
+  "version": "0.0.9",
   "description": "Code generator for Node.js",
   "main": "dist/bin/cli.js",
   "bin": {
