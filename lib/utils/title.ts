@@ -44,4 +44,18 @@ export class Title implements ITitle {
   public static titleCase(str: string): string {
     return str.split(/(?=[A-Z])/).map((s, i) => i === 0 ? Title.decapitalize(s) : Title.capitalize(s)).join('');
   }
+
+  public static getPathFromNamespace(namespace: string): string {
+    if (namespace === '.') {
+      return '';
+    }
+    return namespace.split('.').join('/');
+  }
+
+  public static getNameFromNamespace(namespace: string): string {
+    if (namespace === '.') {
+      return '';
+    }
+    return namespace.split('.').pop() as string;
+  }
 }

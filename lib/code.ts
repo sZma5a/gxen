@@ -8,11 +8,12 @@ import { Title } from "./utils/title";
 
 export interface ICoder {
   create(type: string, namespace: string): void;
-  generate(namespace: string): void;
-  getSettingFilePath(name: string): string;
+  generate(namespace: string, force: boolean): void;
+  getSettingFilePaths(name: string): string[];
   getCreateCodePath(namespace: string): string;
   getGeneratedCodePath(namespace: string): string;
-  getSetting(namespace: string): ISettingYaml;
+  getSettings(namespace: string): ISettingYaml[];
+  replaceImport(properties: any, indexes: any[]): void;
 }
 
 export interface ICoderConfig {
@@ -53,31 +54,40 @@ export class Coder implements ICoder {
     );
   }
 
-  public generate(namespace: string): void {
-    const config = this.getSetting(namespace);
-    const properties = config.properties;
-    const pascalName = config.name.charAt(0).toUpperCase() + config.name.slice(1);
-    properties.pascalName = pascalName;
-    properties.namespacePath = Coder.getPathFromNamespace(namespace);
-    properties.dummy = Dummy;
-    properties.titleUtils = Title;
-    for (const c of config.generate_files) {
-      let path = '';
-      let templatePath = '';
-      if (c.test) {
-        templatePath = this.typer.getTestTemplateFilePath(c.type);
-        path = this.getGeneratedTestCodePath(c.namespace);
-      } else {
-        templatePath = this.typer.getDefaultTemplateFilePath(c.type);
-        path = this.getGeneratedCodePath(c.namespace);
+  public generate(namespace: string, option: Object): void {
+    const force = option['force'] ?? false;
+    const configs = this.getSettings(namespace);
+    for (const config of configs) {
+      const properties = config.properties;
+      const pascalName = config.name.charAt(0).toUpperCase() + config.name.slice(1);
+      properties.pascalName = pascalName;
+      properties.dummy = Dummy;
+      properties.titleUtils = Title;
+      for (const c of config.generate_files) {
+        properties.namespace = c.namespace;
+        properties.namespacePath = Coder.getPathFromNamespace(c.namespace);
+        let path = '';
+        let templatePath = '';
+        if (c.test) {
+          templatePath = this.typer.getTestTemplateFilePath(c.type);
+          path = this.getGeneratedTestCodePath(c.namespace);
+        } else {
+          templatePath = this.typer.getDefaultTemplateFilePath(c.type);
+          path = this.getGeneratedCodePath(c.namespace);
+        }
+        if (c.remake || !Filer.exist(path) || force) {
+          Filer.render(templatePath, path, properties, true, force ? false : !c.remake);
+        }
       }
-      Filer.render(templatePath, path, properties, true, !c.remake);
     }
   }
 
-  public getSettingFilePath(namespace: string): string {
-    const path = this.rootDir + Coder.getPathFromNamespace(namespace) + this.settingExtention;
-    return this.config.getDirPath(path)
+  public getSettingFilePaths(namespace: string): string[] {
+    const path = this.config.getDirPath(this.rootDir + Coder.getPathFromNamespace(namespace))
+    if (Filer.exist(path + this.settingExtention)) {
+      return [path + this.settingExtention]
+    }
+    return Filer.getFiles(path).filter((p) => p.endsWith(this.settingExtention));
   }
 
   public getCreateCodePath(namespace: string): string {
@@ -96,12 +106,57 @@ export class Coder implements ICoder {
   }
 
   private static getPathFromNamespace(namespace: string): string {
+    if (namespace === '.') {
+      return '';
+    }
     return namespace.split('.').join('/');
   }
 
-  public getSetting(namespace: string): ISettingYaml {
-    const path = this.getSettingFilePath(namespace);
-    return Filer.readYaml(path) as ISettingYaml;
+  public replaceImport(properties: any, indexes: any[]): any {
+    let flag = false;
+    for (const d in properties) {
+      if (d === 'import') {
+        const namespace = properties[d].split('.');
+        const path = [];
+        const datapath = [];
+        let filepath = '';
+        for (const n of namespace) {
+          if (filepath === '' && Filer.exist(this.getCreateCodePath(path.join('.')))) {
+            filepath = this.getCreateCodePath(path.join('.'));
+          }
+          if (filepath !== '') {
+            datapath.push(n);
+          } else {
+            path.push(n);
+          }
+        }
+        let data = this.getSetting(filepath);
+        for (const d of datapath) {
+          data = data[d];
+        }
+        // delete properties[d];
+        properties[d] = data;
+      }
+      if (typeof properties[d] === 'object') {
+        flag = true;
+      }
+      if (flag) {
+        properties[d] = this.replaceImport(properties[d], indexes.concat([d]))
+      }
+    }
+    return properties;
+  }
+
+  private getSetting(path: string): ISettingYaml {
+    const data = Filer.readYaml<ISettingYaml>(path);
+    const properties = this.replaceImport(data.properties, []);
+    data.properties = properties;
+    return data;
+  }
+
+  public getSettings(namespace: string): ISettingYaml[] {
+    const paths = this.getSettingFilePaths(namespace);
+    return paths.map((p) => this.getSetting(p));
   }
 
   public static getPascalNameFromNamespace(namespace: string): string {

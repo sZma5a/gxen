@@ -38,8 +38,9 @@ program.command('code:init')
 program.command('code:generate')
   .description('Generate code from template')
   .argument('<namespace>', 'name space')
-  .action((namespace) => {
-    coder.generate(namespace);
+  .option('-f, --force', 'force generate code')
+  .action((namespace, force) => {
+    coder.generate(namespace, force);
   });
 
 program.parse();

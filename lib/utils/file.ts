@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import glob from 'glob';
 import { renderFile } from 'swig';
 import { parse, stringify } from "yaml";
 
@@ -23,7 +24,8 @@ export class Filer implements IFiler {
   }
 
   static readYaml<T>(path: string): T {
-    return parse(Filer.read(path));
+    const data = parse(Filer.read(path));
+    return data;
   }
 
   static write(path: string, content: string, recursiveDirectory?: boolean, existError?: boolean): void {
@@ -58,12 +60,18 @@ export class Filer implements IFiler {
     const codeArray = code.split('\n');
     const fixedCode = codeArray.filter((c, i) => {
       if (c.trim() === '') {
-        if (i > 0 && codeArray[i-1].trim() === '' || codeArray[i-1].trim().slice(-1) === ',') {
-          return false;
+        if (codeArray[i - 1]) {
+          if (i > 0 && codeArray[i - 1].trim() === '' || codeArray[i - 1].trim().slice(-1) === ',') {
+            return false;
+          }
         }
       }
       return true;
     }).join('\n');
     return fixedCode;
+  }
+
+  static getFiles(path: string): string[] {
+    return glob.sync(path+"/**/*");
   }
 }
