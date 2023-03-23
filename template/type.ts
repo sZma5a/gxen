@@ -42,4 +42,6 @@ export interface IGenerateFile {
   namespace: string;
   test?: boolean;
   remake?: boolean;
+  update?: boolean;
+  extension?: string;
 }

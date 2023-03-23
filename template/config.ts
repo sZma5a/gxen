@@ -1,4 +1,5 @@
 export const defaultConfig = {
+  tmpDir: '.tmp/',
   config: {
     workingRootDir: 'gxen/',
   },
@@ -21,6 +22,7 @@ export const defaultConfig = {
 } as IConfigFile
 
 export interface IConfigFile {
+  tmpDir: string;
   config: {
     workingRootDir: string;
   };

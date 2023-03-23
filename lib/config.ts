@@ -32,6 +32,7 @@ export class Config implements IConfig {
     this.generatedTestCodeRootDir = this.config.code.generatedTestCodeRootDir;
     this.coderConfig = {
       ...this.config.code,
+      tmpDir: this.config.tmpDir,
       settingExtension: this.config.extension.settingExtension,
       generatedCodeExtension: this.config.extension.generatedCodeExtension,
       testExtension: this.config.extension.testExtension,

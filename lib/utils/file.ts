@@ -28,6 +28,11 @@ export class Filer implements IFiler {
     return data;
   }
 
+  static readJson<T>(path: string): T {
+    const data = JSON.parse(Filer.read(path));
+    return data;
+  }
+
   static write(path: string, content: string, recursiveDirectory?: boolean, existError?: boolean): void {
     if (Filer.exist(path)) {
       if (existError) {
@@ -44,6 +49,11 @@ export class Filer implements IFiler {
 
   static writeYaml(path: string, content: Object, recursiveDirectory?: boolean, existError?: boolean): void {
     const c = stringify(content);
+    Filer.write(path, c, recursiveDirectory, existError);
+  }
+
+  static writeJson(path: string, content: Object, recursiveDirectory?: boolean, existError?: boolean): void {
+    const c = JSON.stringify(content, null, 2);
     Filer.write(path, c, recursiveDirectory, existError);
   }
 
